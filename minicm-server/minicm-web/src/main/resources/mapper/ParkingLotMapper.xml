@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.aihwaong.minicm.mapper.ParkingLotMapper">
+    <resultMap id="BaseResultMap" type="com.aihwaong.minicm.model.ParkingLot">
+        <id column="id" jdbcType="INTEGER" property="id"/>
+        <result column="number" jdbcType="CHAR" property="number"/>
+        <result column="area_name" jdbcType="CHAR" property="areaName"/>
+        <result column="parking_area_id" jdbcType="INTEGER" property="parkingAreaId"/>
+        <result column="measure" jdbcType="DECIMAL" property="measure"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
+        <result column="business" jdbcType="TINYINT" property="business"/>
+        <result column="status" jdbcType="TINYINT" property="status"/>
+        <result column="is_delete" jdbcType="CHAR" property="isDelete"/>
+    </resultMap>
+
+    <select id="selectAllDataOfPage" resultMap="BaseResultMap">
+        SELECT
+        pl.*, pa.area_name
+        FROM
+        cm_parking_lot pl,
+        cm_parking_area pa
+        WHERE
+        pl.parking_area_id = pa.id
+        <if test="number != null and number != ''">
+            AND pl.number LIKE "%" '${number}' "%"
+        </if>
+        <if test="parkingAreaId != null and parkingAreaId != ''">
+            AND pl.parking_area_id = #{parkingAreaId}
+        </if>
+        ORDER BY id ASC
+        LIMIT #{page}, #{size}
+    </select>
+
+    <select id="selectTotal" resultType="java.lang.Long">
+        SELECT
+        count(*)
+        FROM
+        cm_parking_lot pl,
+        cm_parking_area pa
+        WHERE
+        pl.parking_area_id = pa.id
+        <if test="number != null and number != ''">
+            AND pl.number LIKE "%" '${number}' "%"
+        </if>
+        <if test="parkingAreaId != null and parkingAreaId != ''">
+            AND pl.parking_area_id = #{parkingAreaId}
+        </if>
+    </select>
+
+    <delete id="deleteDatas" parameterType="java.lang.Integer">
+        DELETE
+        FROM
+        cm_parking_lot
+        WHERE
+        id IN
+        <foreach collection="idList" item="item" open="(" close=")" separator=",">
+            #{item}
+        </foreach>
+    </delete>
+
+    <sql id="Base_Column_List">
+        id, number, parking_area_id, measure, create_time, update_time,
+        business, status, is_delete
+    </sql>
+
+    <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from cm_parking_lot
+        where id = #{id,jdbcType=INTEGER}
+    </select>
+
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+        delete from cm_parking_lot
+        where id = #{id,jdbcType=INTEGER}
+    </delete>
+
+    <insert id="insertSelective" parameterType="com.aihwaong.minicm.model.ParkingLot">
+        insert into cm_parking_lot
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                id,
+            </if>
+            <if test="number != null">
+                number,
+            </if>
+            <if test="parkingAreaId != null">
+                parking_area_id,
+            </if>
+            <if test="measure != null">
+                measure,
+            </if>
+            <if test="createTime != null">
+                create_time,
+            </if>
+            <if test="updateTime != null">
+                update_time,
+            </if>
+            <if test="status != null">
+                status,
+            </if>
+            <if test="business != null">
+                business,
+            </if>
+            <if test="isDelete != null">
+                is_delete,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                #{id,jdbcType=INTEGER},
+            </if>
+            <if test="number != null">
+                #{number,jdbcType=CHAR},
+            </if>
+            <if test="parkingAreaId != null">
+                #{parkingAreaId,jdbcType=INTEGER},
+            </if>
+            <if test="measure != null">
+                #{measure,jdbcType=DECIMAL},
+            </if>
+            <if test="createTime != null">
+                #{createTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="updateTime != null">
+                #{updateTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="status != null">
+                #{status,jdbcType=TINYINT},
+            </if>
+            <if test="business != null">
+                #{business,jdbcType=TINYINT},
+            </if>
+            <if test="isDelete != null">
+                #{isDelete,jdbcType=CHAR},
+            </if>
+        </trim>
+    </insert>
+
+    <update id="updateByPrimaryKeySelective" parameterType="com.aihwaong.minicm.model.ParkingLot">
+        update cm_parking_lot
+        <set>
+            <if test="number != null">
+                number = #{number,jdbcType=CHAR},
+            </if>
+            <if test="parkingAreaId != null">
+                parking_area_id = #{parkingAreaId,jdbcType=INTEGER},
+            </if>
+            <if test="measure != null">
+                measure = #{measure,jdbcType=DECIMAL},
+            </if>
+            <if test="createTime != null">
+                create_time = #{createTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="updateTime != null">
+                update_time = #{updateTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="status != null">
+                status = #{status,jdbcType=TINYINT},
+            </if>
+            <if test="business != null">
+                business = #{business,jdbcType=TINYINT},
+            </if>
+            <if test="isDelete != null">
+                is_delete = #{isDelete,jdbcType=CHAR},
+            </if>
+        </set>
+        where id = #{id,jdbcType=INTEGER}
+    </update>
+
+</mapper>
+

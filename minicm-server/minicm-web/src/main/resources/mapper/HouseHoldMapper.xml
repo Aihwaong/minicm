@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.aihwaong.minicm.mapper.HouseHoldMapper">
+    <resultMap id="BaseResultMap" type="com.aihwaong.minicm.model.HouseHold">
+        <id column="id" jdbcType="INTEGER" property="id"/>
+        <result column="household_id" jdbcType="INTEGER" property="householdId"/>
+        <result column="house_id" jdbcType="INTEGER" property="houseId"/>
+        <result column="status" jdbcType="TINYINT" property="status"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
+        <result column="is_delete" jdbcType="CHAR" property="isDelete"/>
+    </resultMap>
+
+    <select id="selectByHouseId" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+        SELECT
+         *
+        FROM cm_house_hold
+        WHERE house_id = #{houseId,jdbcType=INTEGER} AND household_id = #{houseHoldId}
+    </select>
+
+    <insert id="insertSelective" parameterType="com.aihwaong.minicm.model.HouseHold">
+        INSERT INTO cm_house_hold
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                id,
+            </if>
+            <if test="householdId != null">
+                household_id,
+            </if>
+            <if test="houseId != null">
+                house_id,
+            </if>
+            <if test="createTime != null">
+                create_time,
+            </if>
+            <if test="updateTime != null">
+                update_time,
+            </if>
+            <if test="status != null">
+                status,
+            </if>
+            <if test="isDelete != null">
+                is_delete,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                #{id,jdbcType=INTEGER},
+            </if>
+            <if test="householdId != null">
+                #{householdId,jdbcType=INTEGER},
+            </if>
+            <if test="houseId != null">
+                #{houseId,jdbcType=INTEGER},
+            </if>
+            <if test="createTime != null">
+                #{createTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="updateTime != null">
+                #{updateTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="status != null">
+                #{status,jdbcType=TINYINT},
+            </if>
+            <if test="isDelete != null">
+                #{isDelete,jdbcType=CHAR},
+            </if>
+        </trim>
+    </insert>
+
+</mapper>
