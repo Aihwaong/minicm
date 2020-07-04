@@ -38,7 +38,7 @@ import java.util.List;
  * +-------------------------------------------------------
  */
 @Component
-public class PerssonelSecurityFilter implements FilterInvocationSecurityMetadataSource {
+public class SecurityMetadataSource implements FilterInvocationSecurityMetadataSource {
 
     @Autowired
     private MenuService menuService;

@@ -45,7 +45,7 @@ public class MenuController {
 
     @GetMapping("/get")
     public List<Menu> getMenu() {
-        Integer perssonelId = personnelService.getPsersonnel().getId();
+        Integer perssonelId = personnelService.getPsersonnlId();
         return menuService.getMenu(perssonelId);
     }
 }

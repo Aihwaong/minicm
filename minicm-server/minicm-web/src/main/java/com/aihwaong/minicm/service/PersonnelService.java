@@ -67,8 +67,9 @@ public class PersonnelService implements UserDetailsService {
      * 获取用户id
      * @return Personnel
      */
-    public Personnel getPsersonnel() {
-        return  (Personnel) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    public Integer getPsersonnlId() {
+        String personnelId = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        return  Integer.parseInt(personnelId);
     }
 
     /**

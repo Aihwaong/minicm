@@ -35,7 +35,7 @@ import java.util.Collection;
  * +-------------------------------------------------------
  */
 @Component
-public class PerssonelDecisionManager implements AccessDecisionManager {
+public class SecurityDecisionManager implements AccessDecisionManager {
     @Override
     public void decide(Authentication authentication, Object object, Collection<ConfigAttribute> configAttributes) throws AccessDeniedException, InsufficientAuthenticationException {
         for (ConfigAttribute configAttribute : configAttributes) {
