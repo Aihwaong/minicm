@@ -3,6 +3,7 @@ package com.aihwaong.minicm.config;
 import com.aihwaong.minicm.model.ResponseBean;
 import com.aihwaong.minicm.service.PersonnelService;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -49,6 +50,7 @@ import java.io.PrintWriter;
  * +-------------------------------------------------------
  */
 @Configuration
+@Slf4j
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Autowired
@@ -128,7 +130,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                         ResponseBean responseBean = ResponseBean.buildResponseBean().fail("访问失败!");
 
                         if (authException instanceof InsufficientAuthenticationException) {
-                            responseBean.setMessage("请求失败!");
+                            responseBean.setMessage("请求失败!!!");
                         }
 
                         PrintWriter out = response.getWriter();

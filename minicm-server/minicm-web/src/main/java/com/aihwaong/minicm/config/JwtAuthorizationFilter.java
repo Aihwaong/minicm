@@ -1,10 +1,10 @@
 package com.aihwaong.minicm.config;
 
 import com.alibaba.druid.util.StringUtils;
-import lombok.extern.slf4j.Slf4j;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -51,8 +51,8 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
         UsernamePasswordAuthenticationToken authentication = getAuthentication(request);
         if (authentication != null) {
             SecurityContextHolder.getContext().setAuthentication(authentication);
+            chain.doFilter(request, response);
         }
-        chain.doFilter(request, response);
     }
 
     private UsernamePasswordAuthenticationToken getAuthentication(HttpServletRequest request) {
@@ -72,7 +72,7 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
                 if (!StringUtils.isEmpty(username)) {
                     return new UsernamePasswordAuthenticationToken(username, null, authorities);
                 }
-            } catch (Exception e) {
+            } catch (RuntimeException e) {
                 throw e;
             }
         }
