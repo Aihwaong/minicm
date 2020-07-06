@@ -13,6 +13,7 @@
         <result column="parentId" jdbcType="INTEGER" property="parentid"/>
         <result column="enabled" jdbcType="BIT" property="enabled"/>
         <result column="status" jdbcType="TINYINT" property="status"/>
+        <result column="sort" jdbcType="INTEGER" property="sort"/>
         <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
         <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
         <result column="is_delete" jdbcType="CHAR" property="isDelete"/>
@@ -75,7 +76,7 @@
     </sql>
     <sql id="Base_Column_List">
     id, url, path, component, name, iconCls, keepAlive, requireAuth, parentId, enabled, 
-    status, create_time, update_time, is_delete
+    status, sort, create_time, update_time, is_delete
   </sql>
 
     <select id="selectAllMenu" resultMap="BaseResultMap">
@@ -121,6 +122,18 @@
         AND mr.mid = m1.id
         AND m2.id = m1.parentId
         AND pr.pid = #{perssonelId}
+        ORDER BY m1.sort, m2.sort
+    </select>
+
+    <select id="selectMenuIdByparentId" parameterType="java.lang.Integer" resultType="java.lang.Integer">
+        SELECT
+            m2.id
+        FROM
+            cm_menu m1,
+            cm_menu m2
+        WHERE
+            m1.id = m2.parentId
+        AND m1.id = #{id}
     </select>
 
     <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
@@ -131,20 +144,33 @@
     </select>
 
     <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
-    delete from cm_menu
-    where id = #{id,jdbcType=INTEGER}
-  </delete>
+        delete from cm_menu
+        where id = #{id,jdbcType=INTEGER}
+    </delete>
+
+    <delete id="deleteWithRoleByPrimaryKeys" parameterType="java.lang.Integer">
+        DELETE cm_menu,
+         cm_menu_role
+        FROM
+            cm_menu
+        LEFT JOIN cm_menu_role ON cm_menu.id = cm_menu_role.mid
+        WHERE
+        cm_menu.id IN
+        <foreach collection="ids" item="item" open="(" close=")" separator=",">
+            #{item}
+        </foreach>
+    </delete>
 
     <insert id="insert" parameterType="com.aihwaong.minicm.model.Menu">
     insert into cm_menu (id, url, path,
       component, name, iconCls, 
       keepAlive, requireAuth, parentId, 
-      enabled, status, create_time, 
+      enabled, status, sort, create_time,
       update_time, is_delete)
     values (#{id,jdbcType=INTEGER}, #{url,jdbcType=VARCHAR}, #{path,jdbcType=VARCHAR}, 
       #{component,jdbcType=VARCHAR}, #{name,jdbcType=VARCHAR}, #{iconcls,jdbcType=VARCHAR}, 
       #{keepalive,jdbcType=BIT}, #{requireauth,jdbcType=BIT}, #{parentid,jdbcType=INTEGER}, 
-      #{enabled,jdbcType=BIT}, #{status,jdbcType=TINYINT}, #{createTime,jdbcType=TIMESTAMP}, 
+      #{enabled,jdbcType=BIT}, #{status,jdbcType=TINYINT}, #{sort,jdbcType=INTEGER}, #{createTime,jdbcType=TIMESTAMP},
       #{updateTime,jdbcType=TIMESTAMP}, #{isDelete,jdbcType=CHAR})
   </insert>
 
@@ -183,6 +209,9 @@
             </if>
             <if test="status != null">
                 status,
+            </if>
+            <if test="sort != null">
+                sort,
             </if>
             <if test="createTime != null">
                 create_time,
@@ -227,6 +256,9 @@
             </if>
             <if test="status != null">
                 #{status,jdbcType=TINYINT},
+            </if>
+            <if test="sort != null">
+                #{sort,jdbcType=INTEGER},
             </if>
             <if test="createTime != null">
                 #{createTime,jdbcType=TIMESTAMP},
@@ -357,6 +389,9 @@
             <if test="status != null">
                 status = #{status,jdbcType=TINYINT},
             </if>
+            <if test="sort != null">
+                sort = #{status,jdbcType=INTEGER},
+            </if>
             <if test="createTime != null">
                 create_time = #{createTime,jdbcType=TIMESTAMP},
             </if>
@@ -386,6 +421,7 @@
         parentId = #{parentid,jdbcType=INTEGER},
         enabled = #{enabled,jdbcType=BIT},
         status = #{status,jdbcType=TINYINT},
+        sort = #{sort,jdbcType=INTEGER},
         create_time = #{createTime,jdbcType=TIMESTAMP},
         update_time = #{updateTime,jdbcType=TIMESTAMP},
         is_delete = #{isDelete,jdbcType=CHAR}

@@ -27,6 +27,8 @@ public class Menu {
 
     private Byte status;
 
+    private Integer sort;
+
     private Date createTime;
 
     private Date updateTime;
@@ -139,6 +141,14 @@ public class Menu {
 
     public void setStatus(Byte status) {
         this.status = status;
+    }
+
+    public Integer getSort() {
+        return sort;
+    }
+
+    public void setSort(Integer sort) {
+        this.sort = sort;
     }
 
     public Date getCreateTime() {

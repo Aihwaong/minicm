@@ -7,6 +7,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -63,6 +64,18 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         String account = request.getParameter("account");
         String password = request.getParameter("password");
 
+        checkVerifyCode(request, request.getParameter("verifyCode"));
+
+        if (account == null) {
+            account = "";
+        }
+
+        if (password == null) {
+            password = "";
+        }
+
+        account = account.trim();
+
         UsernamePasswordAuthenticationToken uToken = new UsernamePasswordAuthenticationToken(account, password);
         return this.authenticationManager.authenticate(uToken);
     }
@@ -80,7 +93,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
                 .setHeaderParam("TYP", JwtConfigInfo.TOKEN_TYPE)
                 .setSubject("" + personnel.getId())
                 .setIssuedAt(new Date()) // 签发时间
-                .setExpiration(new Date(System.currentTimeMillis() + 120 * 1000)) // 过期时间
+                .setExpiration(new Date(System.currentTimeMillis() + JwtConfigInfo.TOKEN_EXP)) // 过期时间
                 .setIssuer(JwtConfigInfo.TOKEN_ISS)
                 .claim("roles", roles)
                 .signWith(secretKey)
@@ -93,7 +106,8 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         response.setContentType("application/json;charset=utf-8");
         response.setHeader(JwtConfigInfo.TOKEN_HEADER, JwtConfigInfo.TOKEN_PREFIX + token);
 
-        personnel.setPassword(null);  // 需要返回前端，去掉密码
+        personnel.setPassword(null);
+
         Map<String, Object> stringObjectMap = new HashMap<>();
         stringObjectMap.put("data", personnel);
         stringObjectMap.put("token", "Bearer " + token);
@@ -101,7 +115,16 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 
         PrintWriter printWriter = response.getWriter();
         printWriter.write(objectMapper);
+        printWriter.flush();
         printWriter.close();
     }
 
+    private void checkVerifyCode(HttpServletRequest request, String verifyCode) {
+        // 获取生成的验证码
+        String verifyCodeExpected = (String) request.getSession().getAttribute(com.google.code.kaptcha.Constants.KAPTCHA_SESSION_KEY);
+        if (verifyCode == null || !verifyCode.equalsIgnoreCase(verifyCodeExpected)) {
+            // 验证码不正确
+            throw new AuthenticationServiceException("验证码不正确");
+        }
+    }
 }

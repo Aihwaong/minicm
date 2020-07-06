@@ -1,6 +1,7 @@
 package com.aihwaong.minicm.mapper;
 
 import com.aihwaong.minicm.model.Menu;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
@@ -23,4 +24,8 @@ public interface MenuMapper {
     List<Menu> getMenuOfRole();
 
     List<Menu> selectAllMenu();
+
+    Integer[] selectMenuIdByparentId(Integer id);
+
+    int deleteWithRoleByPrimaryKeys(@Param("ids") Integer[] ids);
 }

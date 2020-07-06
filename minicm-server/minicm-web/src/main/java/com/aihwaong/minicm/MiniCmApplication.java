@@ -3,6 +3,7 @@ package com.aihwaong.minicm;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.ImportResource;
 
 /**
  * +-------------------------------------------------------
@@ -29,6 +30,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  */
 @SpringBootApplication
 @MapperScan(basePackages = {"com.aihwaong.minicm.mapper"})
+@ImportResource(locations = {"classpath:kaptcha/kaptcha.xml"})
 public class MiniCmApplication {
 
     public static void main(String[] args) {

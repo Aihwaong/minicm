@@ -48,7 +48,6 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws IOException, ServletException {
-        log.info("========= 4 =========");
         UsernamePasswordAuthenticationToken authentication = getAuthentication(request);
         if (authentication != null) {
             SecurityContextHolder.getContext().setAuthentication(authentication);
@@ -58,15 +57,13 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
 
     private UsernamePasswordAuthenticationToken getAuthentication(HttpServletRequest request) {
 
-
-        String token = request.getHeader("Authorization");
-        if (!StringUtils.isEmpty(token) && token.startsWith("Bearer")) {
+        String token = request.getHeader(JwtConfigInfo.TOKEN_HEADER);
+        if (!StringUtils.isEmpty(token) && token.startsWith(JwtConfigInfo.TOKEN_PREFIX)) {
             try {
                 Jws<Claims> paresToken = Jwts.parserBuilder()
-                        .setSigningKey("WFLZJixwR9UTzDY5js4BSutv1L8HWJzLnHeROaQ0C/5kBc=".getBytes())
+                        .setSigningKey(JwtConfigInfo.TOKEN_KEY.getBytes())
                         .build()
-                        .parseClaimsJws(token.replace("Bearer ", " "));
-
+                        .parseClaimsJws(token.replace(JwtConfigInfo.TOKEN_PREFIX, " "));
 
                 List<SimpleGrantedAuthority> authorities = ((List<?>) paresToken.getBody().get("roles")).stream()
                         .map(authority -> new SimpleGrantedAuthority((String) authority)).collect(Collectors.toList());

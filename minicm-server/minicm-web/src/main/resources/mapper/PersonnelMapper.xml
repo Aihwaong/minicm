@@ -76,7 +76,7 @@
     <select id="getAllPerssonelOfPage" resultMap="ClientMap">
         SELECT * FROM cm_personnel WHERE is_delete = '0'
         <if test="keyWord != null and keyWord != ''">
-            AND title LIKE "%" '#{keyWord}' "%"
+            AND real_name LIKE "%" '${keyWord}' "%"
         </if>
         ORDER BY id ASC
         LIMIT #{page}, #{size}
@@ -317,7 +317,7 @@
     <select id="selectTotal" resultType="java.lang.Long">
         SELECT count(*) FROM cm_personnel WHERE is_delete = '0'
         <if test="keyWord != null and keyWord != ''">
-            AND title LIKE "%" '${keyWord}' "%"
+            AND real_name LIKE "%" '${keyWord}' "%"
         </if>
     </select>
 </mapper>

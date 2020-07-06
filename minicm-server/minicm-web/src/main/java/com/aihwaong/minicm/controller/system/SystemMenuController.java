@@ -80,9 +80,9 @@ public class SystemMenuController {
     public ResponseBean deleteMenu(
             @PathVariable("id") Integer id
     ) {
-        int result = menuService.deleteMenu(id);
+        Boolean result = menuService.deleteMenu(id);
         ResponseBean responseBean = ResponseBean.buildResponseBean();
-        if (result > 0) {
+        if (result) {
             return responseBean.setMessage("删除成功");
         } else {
             return responseBean.setMessage("删除失败");

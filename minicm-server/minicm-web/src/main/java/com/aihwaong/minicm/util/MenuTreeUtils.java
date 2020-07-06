@@ -30,14 +30,14 @@ import java.util.List;
  * +-------------------------------------------------------
  */
 @Slf4j
-public class MenuTreeUtil {
+public class MenuTreeUtils {
     private List<Menu> menuList;
 
-    public MenuTreeUtil(List<Menu> menuList) {
+    public MenuTreeUtils(List<Menu> menuList) {
         this.menuList = menuList;
     }
 
-    //建立树形结构
+    // 建立树形结构
     public List<Menu> builTree() {
         List<Menu> treeMenus = new ArrayList<>();
         for (Menu menuNode : getRootNode()) {
@@ -46,7 +46,7 @@ public class MenuTreeUtil {
         return treeMenus;
     }
 
-    //递归，建立子树形结构
+    // 递归，建立子树形结构
     private Menu buildChilTree(Menu pNode) {
         List<Menu> chilMenus = new ArrayList<>();
         for (Menu menuNode : menuList) {
@@ -58,7 +58,7 @@ public class MenuTreeUtil {
         return pNode;
     }
 
-    //获取根节点
+    // 获取根节点
     private List<Menu> getRootNode() {
         List<Menu> rootMenuLists = new ArrayList<>();
         for (Menu menuNode : menuList) {

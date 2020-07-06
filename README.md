@@ -1,37 +1,33 @@
-# vcm
+# minicm
 
-#### 介绍
-微社区
+### 介绍
 
-#### 软件架构
-软件架构说明
+Minicm（MIni社区）项目是一套微型社区管理系统，包括后台管理系统以及客户端，基于SpringBoot+Mybatis实现。后台管理系统包含社区基础信息管理、楼宇信息管理、住户管理、车位管理、报修管理、访客管理、通知管理、服务缴费、统计报表、权限管理等模块。
+
+### 使用技术
+
+SpringBoot
+
+SpringSecurity
+
+JWT
+
+Swagger2
+
+Vue
+
+Vuex
+
+axios
+
+Element-UI
+
+Mybatis
+
+Mybatis-generator
+
+### 开发进度
+
+后台功能基本完成，部分功能还再进一步完善当中，即将开始研发客户端
 
 
-#### 安装教程
-
-1.  xxxx
-2.  xxxx
-3.  xxxx
-
-#### 使用说明
-
-1.  xxxx
-2.  xxxx
-3.  xxxx
-
-#### 参与贡献
-
-1.  Fork 本仓库
-2.  新建 Feat_xxx 分支
-3.  提交代码
-4.  新建 Pull Request
-
-
-#### 码云特技
-
-1.  使用 Readme\_XXX.md 来支持不同的语言，例如 Readme\_en.md, Readme\_zh.md
-2.  码云官方博客 [blog.gitee.com](https://blog.gitee.com)
-3.  你可以 [https://gitee.com/explore](https://gitee.com/explore) 这个地址来了解码云上的优秀开源项目
-4.  [GVP](https://gitee.com/gvp) 全称是码云最有价值开源项目，是码云综合评定出的优秀开源项目
-5.  码云官方提供的使用手册 [https://gitee.com/help](https://gitee.com/help)
-6.  码云封面人物是一档用来展示码云会员风采的栏目 [https://gitee.com/gitee-stars/](https://gitee.com/gitee-stars/)

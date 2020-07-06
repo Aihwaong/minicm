@@ -29,4 +29,5 @@ public class JwtConfigInfo {
     public static final String TOKEN_PREFIX = "Bearer ";
     public static final String TOKEN_TYPE   = "JWT";
     public static final String TOKEN_ISS    = "Aihwaong.com";
+    public static final Integer TOKEN_EXP   = 1800 * 1000;
 }

@@ -10,6 +10,7 @@ import org.springframework.security.authentication.InsufficientAuthenticationExc
 import org.springframework.security.config.annotation.ObjectPostProcessor;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.AuthenticationException;
@@ -75,6 +76,15 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         auth.userDetailsService(personnelService);
     }
 
+    @Override
+    public void configure(WebSecurity web) throws Exception {
+        web.ignoring()
+                .antMatchers("/v2/api-docs", "/swagger-resources/configuration/ui",
+                "/swagger-resources", "/swagger-resources/configuration/security",
+                "/swagger-ui.html", "/webjars/**")
+                .antMatchers("/verify");
+    }
+
     /**
      * 响应规则
      *
@@ -86,16 +96,30 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .authorizeRequests()
-                .antMatchers("/v2/api-docs", "/swagger-resources/configuration/ui",
-                        "/swagger-resources", "/swagger-resources/configuration/security",
-                        "/swagger-ui.html", "/webjars/**")
-                .permitAll()
+                .withObjectPostProcessor(new ObjectPostProcessor<FilterSecurityInterceptor>() {
+                    @Override
+                    public <O extends FilterSecurityInterceptor> O postProcess(O object) {
+                        object.setAccessDecisionManager(securityDecisionManager);
+                        object.setSecurityMetadataSource(securityMetadataSource);
+                        return object;
+                    }
+                })
                 .anyRequest()
-                .authenticated().and().csrf()
+                .authenticated()
+                .and()
+                .addFilter(new JwtAuthenticationFilter(authenticationManager()))
+                .addFilter(new JwtAuthorizationFilter(authenticationManager()))
+                .formLogin()
+                .usernameParameter("account")
+                .passwordParameter("password")
+                .loginPage("/login")
+                .permitAll()
+                .and()
+                .csrf()
                 .disable()
                 .exceptionHandling()
-                //没有认证时，在这里处理结果，不要重定向
                 .authenticationEntryPoint(new AuthenticationEntryPoint() {
+                    // 无认证时，处理结果，不重定向
                     @Override
                     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException, ServletException {
                         response.setContentType("application/json;charset=utf-8");
@@ -112,28 +136,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                         out.flush();
                         out.close();
                     }
-                });
-
-        http.authorizeRequests()
-                .withObjectPostProcessor(new ObjectPostProcessor<FilterSecurityInterceptor>() {
-                    @Override
-                    public <O extends FilterSecurityInterceptor> O postProcess(O object) {
-                        object.setAccessDecisionManager(securityDecisionManager);
-                        object.setSecurityMetadataSource(securityMetadataSource);
-                        return object;
-                    }
-                })
-                .and()
-                .addFilter(new JwtAuthenticationFilter(authenticationManager()))
-                .addFilter(new JwtAuthorizationFilter(authenticationManager()))
-                .formLogin()
-                .usernameParameter("account")
-                .passwordParameter("password")
-                .loginPage("/login")
-                .permitAll()
-                .and()
-                .headers()
-                .cacheControl();
-
+                }).and().headers().cacheControl();
     }
 }
