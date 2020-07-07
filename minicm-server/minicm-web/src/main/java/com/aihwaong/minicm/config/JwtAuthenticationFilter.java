@@ -8,6 +8,7 @@ import io.jsonwebtoken.security.Keys;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationServiceException;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -100,6 +101,25 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
                 .compact();
 
         responseData(response, token, personnel);
+
+    }
+
+    @Override
+    protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) throws IOException, ServletException {
+        response.setContentType("application/json;charset=utf-8");
+
+        ResponseBean responseBean = ResponseBean.buildResponseBean();
+        if (failed instanceof BadCredentialsException) {
+            responseBean.fail("用户名或密码错误");
+        } else if (failed instanceof AuthenticationServiceException){
+            responseBean.fail(failed.getMessage());
+        }
+
+        String objectMapper = new ObjectMapper().writeValueAsString(responseBean);
+        PrintWriter printWriter = response.getWriter();
+        printWriter.write(objectMapper);
+        printWriter.flush();
+        printWriter.close();
     }
 
     private void responseData(HttpServletResponse response, String token, Personnel personnel) throws IOException {
