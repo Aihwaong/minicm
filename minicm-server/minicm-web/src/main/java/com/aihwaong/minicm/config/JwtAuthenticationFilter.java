@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -18,6 +19,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import javax.crypto.SecretKey;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -55,9 +57,11 @@ import java.util.stream.Collectors;
 public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
     private final AuthenticationManager authenticationManager;
+    private RedisTemplate<String, Object> redisTemplate;
 
-    public JwtAuthenticationFilter(AuthenticationManager authenticationManager) {
+    public JwtAuthenticationFilter(AuthenticationManager authenticationManager, RedisTemplate<String, Object> redisTemplate) {
         this.authenticationManager = authenticationManager;
+        this.redisTemplate = redisTemplate;
     }
 
     @Override
@@ -111,7 +115,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         ResponseBean responseBean = ResponseBean.buildResponseBean();
         if (failed instanceof BadCredentialsException) {
             responseBean.fail("用户名或密码错误");
-        } else if (failed instanceof AuthenticationServiceException){
+        } else if (failed instanceof AuthenticationServiceException) {
             responseBean.fail(failed.getMessage());
         }
 
@@ -140,11 +144,20 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     }
 
     private void checkVerifyCode(HttpServletRequest request, String verifyCode) {
+        Cookie[] cookies = request.getCookies();
+        String uuid = "";
+        for (Cookie cookie : cookies) {
+            String cookieName = cookie.getName();
+            if ("captcha".equals(cookieName)) {
+                uuid = cookie.getValue();
+            }
+        }
         // 获取生成的验证码
-        String verifyCodeExpected = (String) request.getSession().getAttribute(com.google.code.kaptcha.Constants.KAPTCHA_SESSION_KEY);
+        String verifyCodeExpected = (String) redisTemplate.opsForValue().get(uuid);
         if (verifyCode == null || !verifyCode.equalsIgnoreCase(verifyCodeExpected)) {
             // 验证码不正确
             throw new AuthenticationServiceException("验证码不正确");
         }
+        redisTemplate.delete(uuid);
     }
 }

@@ -2,14 +2,15 @@ package com.aihwaong.minicm.config;
 
 import com.alibaba.druid.util.StringUtils;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 
 import javax.servlet.FilterChain;
@@ -17,6 +18,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -46,6 +48,14 @@ import java.util.stream.Collectors;
 @Slf4j
 public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
 
+    private RedisTemplate<String, Object> redisTemplate;
+
+
+    public JwtAuthorizationFilter(AuthenticationManager authenticationManager, RedisTemplate<String, Object> redisTemplate) {
+        super(authenticationManager);
+        this.redisTemplate = redisTemplate;
+    }
+
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws IOException, ServletException {
         UsernamePasswordAuthenticationToken authentication = getAuthentication(request);
@@ -72,19 +82,28 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
                 if (!StringUtils.isEmpty(username)) {
                     return new UsernamePasswordAuthenticationToken(username, null, authorities);
                 }
-            } catch (RuntimeException e) {
-                throw e;
+            } catch (ExpiredJwtException e) {
+                timeCompare(e.getClaims().getExpiration());
             }
         }
         return null;
     }
 
-    public JwtAuthorizationFilter(AuthenticationManager authenticationManager) {
-        super(authenticationManager);
-    }
+    private void timeCompare (Date tokenDate) {
+        Date newDate = new Date();
 
-    public JwtAuthorizationFilter(AuthenticationManager authenticationManager, AuthenticationEntryPoint authenticationEntryPoint) {
-        super(authenticationManager, authenticationEntryPoint);
+        long dayms = 1000 * 24 * 60 * 60; // 天毫秒数
+        long hoursms = 1000 * 60 * 60; // 小时毫秒数
+        long minutesms = 1000 * 60; // 分钟毫秒数
+
+        long differenceValue = newDate.getTime() - tokenDate.getTime();
+
+        long dayDifference = differenceValue / dayms; // 计算差多少分钟
+        long hoursDifference = differenceValue % dayms / hoursms; // 计算差多少分钟
+        long minutesDifference = differenceValue % dayms % hoursms / minutesms; // 计算差多少分钟
+
+        log.info("时间差:{}天{}小时{}分钟", dayDifference, hoursDifference, minutesDifference);
+        redisTemplate.opsForValue().set("" + minutesDifference, minutesDifference);
     }
 
 }

@@ -5,8 +5,10 @@ import com.aihwaong.minicm.service.PersonnelService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.config.annotation.ObjectPostProcessor;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -36,7 +38,7 @@ import java.io.PrintWriter;
  * +-------------------------------------------------------
  * | @ProjectName:   cm
  * +-------------------------------------------------------
- * | @Description:   响应规则，认证成功、失败回调
+ * | @Description:   Security配置
  * +-------------------------------------------------------
  * | @author:        王富琳
  * +-------------------------------------------------------
@@ -61,6 +63,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Autowired
     private SecurityMetadataSource securityMetadataSource;
+
+    @Autowired
+    @Qualifier("redisTemplates")
+    private RedisTemplate<String, Object> redisTemplate;
+
 
     /**
      * 加密方式
@@ -109,8 +116,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .anyRequest()
                 .authenticated()
                 .and()
-                .addFilter(new JwtAuthenticationFilter(authenticationManager()))
-                .addFilter(new JwtAuthorizationFilter(authenticationManager()))
+                .addFilter(new JwtAuthenticationFilter(authenticationManager(), redisTemplate))
+                .addFilter(new JwtAuthorizationFilter(authenticationManager(), redisTemplate))
                 .formLogin()
                 .usernameParameter("account")
                 .passwordParameter("password")
@@ -140,4 +147,5 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                     }
                 }).and().headers().cacheControl();
     }
+
 }

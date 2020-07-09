@@ -1,19 +1,23 @@
 package com.aihwaong.minicm.controller;
 
 import com.aihwaong.minicm.model.ResponseBean;
-import com.google.code.kaptcha.Constants;
 import com.google.code.kaptcha.Producer;
+import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.imageio.ImageIO;
 import javax.servlet.ServletOutputStream;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 import java.awt.image.BufferedImage;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 /**
  * +-------------------------------------------------------
@@ -41,6 +45,9 @@ import java.awt.image.BufferedImage;
 @RestController
 @Slf4j
 public class LoginController {
+    @Autowired
+    @Qualifier("redisTemplates")
+    private RedisTemplate redisTemplate;
 
     @Autowired
     private Producer captchaProducer = null;
@@ -51,19 +58,27 @@ public class LoginController {
     }
 
     @GetMapping("/verify")
+    @ApiOperation(value = "登录验证码")
     public void getKaptchaImage(HttpServletRequest request, HttpServletResponse response) throws Exception {
-        HttpSession session = request.getSession();
+        // 禁止缓存
         response.setDateHeader("Expires", 0);
         response.setHeader("Cache-Control", "no-store, no-cache, must-revalidate");
         response.addHeader("Cache-Control", "post-check=0, pre-check=0");
         response.setHeader("Pragma", "no-cache");
         response.setContentType("image/jpeg");
 
-        //生成验证码
+        // 生成验证码
         String capText = captchaProducer.createText();
-        session.setAttribute(Constants.KAPTCHA_SESSION_KEY, capText);
+        String uuid = UUID.randomUUID().toString();
+        // 存入Redis
+        redisTemplate.opsForValue().set(uuid, capText, 1, TimeUnit.MINUTES);
+        Cookie cookie = new Cookie("captcha",uuid);
+
+        // key写入cookie，验证时获取
+        response.addCookie(cookie);
         log.info(">>>>>>>" + capText);
-        //向客户端写出
+
+        // 向客户端写出
         BufferedImage bi = captchaProducer.createImage(capText);
         ServletOutputStream out = response.getOutputStream();
         ImageIO.write(bi, "jpg", out);
